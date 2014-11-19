@@ -16,6 +16,7 @@ release.properties
 dependency-reduced-pom.xml
 
 out/
+*~
 
 # libgmp
 gmp-*.tar.bz2

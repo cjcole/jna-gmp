@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.squareup.jnagmp</groupId>
+    <groupId>org.cjcole.jnagmp</groupId>
     <artifactId>jnagmp-parent</artifactId>
     <version>1.0.1-SNAPSHOT</version>
   </parent>

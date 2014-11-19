@@ -9,7 +9,7 @@
     <version>7</version>
   </parent>
 
-  <groupId>com.squareup.jnagmp</groupId>
+  <groupId>org.cjcole.jnagmp</groupId>
   <artifactId>jnagmp-parent</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -18,20 +18,20 @@
   <inceptionYear>2013</inceptionYear>
 
   <scm>
-    <url>https://github.com/square/jna-gmp</url>
-    <connection>scm:git:https://github.com/square/jna-gmp.git</connection>
-    <developerConnection>scm:git:git@github.com:square/jna-gmp.git</developerConnection>
+    <url>https://github.com/cjcole/jna-gmp</url>
+    <connection>scm:git:https://github.com/cjcole/jna-gmp.git</connection>
+    <developerConnection>scm:git:git@github.com:cjcole/jna-gmp.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <organization>
-    <name>Square, Inc.</name>
-    <url>http://squareup.com</url>
+    <name>cjcole</name>
+    <url>http://cjcole.org</url>
   </organization>
 
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>http://github.com/square/jna-gmp/issues</url>
+    <url>http://github.com/cjcole/jna-gmp/issues</url>
   </issueManagement>
 
   <licenses>

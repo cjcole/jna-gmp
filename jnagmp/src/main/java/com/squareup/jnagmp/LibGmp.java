@@ -314,6 +314,73 @@ public final class LibGmp {
    */
   public static native void __gmpz_powm_sec(mpz_t rop, mpz_t base, mpz_t exp, mpz_t mod);
 
+  /**
+   * Set the value of rop from op.
+   */
+  public static native void __gmpz_set_si(mpz_t rop, long si);
+
+  /**
+   * Set rop to op1 + op2.
+   */
+  public static native void __gmpz_add(mpz_t rop, mpz_t op1, mpz_t op2);
+
+  /**
+   * Set rop to op1 + op2.
+   */
+  public static native void __gmpz_add_ui(mpz_t rop, mpz_t op1, long op2);
+
+  /**
+   * Set rop to op1 - op2.
+   */
+  public static native void __gmpz_sub(mpz_t rop, mpz_t op1, mpz_t op2);
+
+  /**
+   * Set rop to op1 - op2.
+   */
+  public static native void __gmpz_sub_ui(mpz_t rop, mpz_t op1, long op2);
+
+  /**
+   * Set rop to op1 times op2.
+   */
+  public static native void __gmpz_mul(mpz_t rop, mpz_t op1, mpz_t op2);
+
+  /**
+   * Set rop to op1 times op2.
+   */
+  public static native void __gmpz_mul_ui(mpz_t rop, mpz_t op1, long op2);
+
+  /**
+   * Return the size of op measured in number of digits in the given
+   * base. base can vary from 2 to 62. The sign of op is ignored, just
+   * the absolute value is used. The result will be either exact or 1
+   * too big. If base is a power of 2, the result is always exact. If
+   * op is zero the return value is always 1.
+   *
+   * This function can be used to determine the space required when
+   * converting op to a string. The right amount of allocation is
+   * normally two more than the value returned by mpz_sizeinbase, one
+   * extra for a minus sign and one for the null-terminator.
+   *
+   * It will be noted that mpz_sizeinbase(op,2) can be used to locate
+   * the most significant 1 bit in op, counting from 1. (Unlike the
+   * bitwise functions which start from 0, See <a
+   * href="https://gmplib.org/manual/Integer-Logic-and-Bit-Fiddling.html">Logical
+   * and Bit Manipulation Functions</a>.)
+   */
+  public static native long/*size_t: tbd*/ __gmpz_sizeinbase(mpz_t op, int base);
+
+  /*tbd*/
+  public static native Pointer __gmpz_get_str(Pointer str, int base, mpz_t op);
+
+  /*tbd*/
+  public static native long __gmpz_get_ui(mpz_t op);
+
+  /*tbd*/
+  public static native int __gmpz_cmp(mpz_t op1, mpz_t op2);
+
+  /*tbd*/
+  public static native int __gmpz_cmp_si(mpz_t op1, long op2);
+
   private LibGmp() {
   }
 }

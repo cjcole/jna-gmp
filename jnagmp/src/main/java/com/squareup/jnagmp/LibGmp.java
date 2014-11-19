@@ -350,6 +350,16 @@ public final class LibGmp {
   public static native void __gmpz_mul_ui(mpz_t rop, mpz_t op1, long op2);
 
   /**
+   * Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.
+   */
+  public static native void __gmpz_mod(mpz_t r, mpz_t n, mpz_t d);
+
+  /**
+   * Set rop to −op.
+   */
+  public static native void __gmpz_neg(mpz_t rop, mpz_t op);
+
+  /**
    * Return the size of op measured in number of digits in the given
    * base. base can vary from 2 to 62. The sign of op is ignored, just
    * the absolute value is used. The result will be either exact or 1

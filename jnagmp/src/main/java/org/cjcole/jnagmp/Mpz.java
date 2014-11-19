@@ -92,6 +92,18 @@ public class Mpz {
     return rop;
   }
 
+  public Mpz mod(Mpz op) {
+    Mpz rop = new Mpz();
+    LibGmp.__gmpz_mod(rop.getPeer(), getPeer(), op.getPeer());
+    return rop;
+  }
+
+  public Mpz neg() {
+    Mpz rop = new Mpz();
+    LibGmp.__gmpz_neg(rop.getPeer(), getPeer());
+    return rop;
+  }
+
   public Mpz powm(Mpz exp, Mpz mod) {
     Mpz rop = new Mpz();
     LibGmp.__gmpz_powm(rop.getPeer(), getPeer(), exp.getPeer(), mod.getPeer());

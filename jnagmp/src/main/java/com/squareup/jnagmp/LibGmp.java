@@ -317,7 +317,12 @@ public final class LibGmp {
   /**
    * Set the value of rop from op.
    */
-  public static native void __gmpz_set_si(mpz_t rop, long si);
+  public static native void __gmpz_set_si(mpz_t rop, long op);
+
+  /**
+   * Set the value of rop from op.
+   */
+  public static native void __gmpz_set(mpz_t rop, mpz_t op);
 
   /**
    * Set rop to op1 + op2.
@@ -350,6 +355,16 @@ public final class LibGmp {
   public static native void __gmpz_mul_ui(mpz_t rop, mpz_t op1, long op2);
 
   /**
+   * Divide n by d, forming a quotient q.
+   */
+  public static native void __gmpz_cdiv_q(mpz_t q, mpz_t n, mpz_t d);
+
+  /**
+   * Divide n by d, forming a quotient q.
+   */
+  public static native void __gmpz_cdiv_q_ui(mpz_t q, mpz_t n, long d);
+
+  /**
    * Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.
    */
   public static native void __gmpz_mod(mpz_t r, mpz_t n, mpz_t d);
@@ -358,6 +373,15 @@ public final class LibGmp {
    * Set rop to −op.
    */
   public static native void __gmpz_neg(mpz_t rop, mpz_t op);
+
+  /**
+   * Compute the inverse of op1 modulo op2 and put the result in
+   * rop. If the inverse exists, the return value is non-zero and rop
+   * will satisfy 0 < rop < abs(op2). If an inverse doesn't exist the
+   * return value is zero and rop is undefined. The behaviour of this
+   * function is undefined when op2 is zero.
+   */
+  public static native void __gmpz_invert(mpz_t rop, mpz_t op1, mpz_t op2);
 
   /**
    * Return the size of op measured in number of digits in the given

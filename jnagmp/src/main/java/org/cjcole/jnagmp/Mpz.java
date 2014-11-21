@@ -52,8 +52,12 @@ public class Mpz {
   public Mpz() {
   }
 
-  public Mpz(long si) {
-    LibGmp.__gmpz_set_si(getPeer(), si);
+  public Mpz(Mpz op) {
+    LibGmp.__gmpz_set(getPeer(), op.getPeer());
+  }
+
+  public Mpz(long op) {
+    LibGmp.__gmpz_set_si(getPeer(), op);
   }
 
   public Mpz add(Mpz op) {
@@ -92,6 +96,18 @@ public class Mpz {
     return rop;
   }
 
+  public Mpz cdivQ(Mpz d) {
+    Mpz rop = new Mpz();
+    LibGmp.__gmpz_cdiv_q(rop.getPeer(), getPeer(), d.getPeer());
+    return rop;
+  }
+
+  public Mpz cdivQ(long d) {
+    Mpz rop = new Mpz();
+    LibGmp.__gmpz_cdiv_q_ui(rop.getPeer(), getPeer(), d);
+    return rop;
+  }
+
   public Mpz mod(Mpz op) {
     Mpz rop = new Mpz();
     LibGmp.__gmpz_mod(rop.getPeer(), getPeer(), op.getPeer());
@@ -107,6 +123,12 @@ public class Mpz {
   public Mpz powm(Mpz exp, Mpz mod) {
     Mpz rop = new Mpz();
     LibGmp.__gmpz_powm(rop.getPeer(), getPeer(), exp.getPeer(), mod.getPeer());
+    return rop;
+  }
+
+  public Mpz invert(Mpz mod) {
+    Mpz rop = new Mpz();
+    LibGmp.__gmpz_invert(rop.getPeer(), getPeer(), mod.getPeer());
     return rop;
   }
 

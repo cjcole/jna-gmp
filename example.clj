@@ -1,31 +1,53 @@
 (require '[clojure.core.reducers :as r])
 (defn mpz [x] (new org.cjcole.jnagmp.Mpz x))
-(defn mpz+ 
-  ([] (mpz 0))
-  ([a b] (.add a b)))
 (def mpz0 (mpz 0))
 (def np 2)
 (def p (mpz 47))
 (def q (.cdivQ (.sub p 1) 2))
 (def g (mpz 25))
+(defn mpz+ 
+  ([] (mpz 0))
+  ([a b] (.mod (.add a b) p)))
+(defn mpz*
+  ([] [(mpz 1) (mpz 1)])
+  ([a b] [(.mod (.mul (first a) (first b)) p) (.mod (.mul (second a) (second b)) p)]))
 (def xvec
   (loop [i 0 xvec []]
     (let [x (mpz (+ 13 i))] ; random from Z*q
       (if (= i np)
         xvec
         (recur (+ i 1) (conj xvec x))))))
-;; TODO: remove x, use xvec
-(def x (.mod (r/fold mpz+ xvec) p))
+(def rands
+  (loop [i 0 rands []]
+    (let [rand (mpz (+ 2 i))] ; random from Z*q
+      (if (= i np)
+        rands
+        (recur (+ i 1) (conj rands rand))))))
 (def yvec
   (loop [i 0 yvec []]
     (if (= i np)
       yvec
       (recur (+ i 1) (conj yvec (.powm g (nth xvec i) p))))))
-;; TODO: remove y, use yvec
+(def mvec
+  (loop [i 0 mvec []]
+    (if (= i np)
+      mvec
+      (recur (+ i 1) (conj mvec (.powm g (mpz i) p))))))
+;; TODO: remove x, y, use xvec, yvec
+(def x (.mod (r/fold mpz+ xvec) p))
 (def y (.powm g x p)) ; a.k.a. "h"
 
-(defn encr [m r] [(.powm g r p) (.mod (.mul m (.powm y r p)) p)])
+(defn encr1 [vec]
+  (let [m (nth vec 0) y (nth vec 1) r (nth vec 2)]
+    (let [result [(.powm g r p) (.mod (.mul m (.powm y r p)) p)]]
+      (println vec)
+      (println result)
+      result)))
+(defn encr [mvec] (r/fold mpz* (r/map encr1 (map vector mvec yvec rands))))
+;; TODO: use of "x"
 (defn decr [e] (.mod (.mul (second e) (.powm (first e) (.neg x) p)) p))
+(dotimes [i (.toInt q)] (println "i=" i ", g^i= " (.powm g (mpz i) p))); XXX
+(decr (encr mvec)) ; XXX
 
 (defn logs-eq? [params exp]
   (let [g1 (nth params 0)
@@ -49,13 +71,13 @@
         m (.mod (.mul (first e1) (.invert (first e2) p)) p)
         s (.mod (.mul (second e1) (.invert (second e2) p)) p)
         sa (.powm s a p)
-        max (.powm m (.mul a x) p)
+        max (.powm m (.mul a x) p) ;; TODO: use of "x"
         ma (.powm m a p)
        ]
     (and
       (= sa max)
       (logs-eq? [m ma s sa] a)
-      (logs-eq? [g y ma max] x))))
+      (logs-eq? [g y ma max] x)))) ;; TODO: use of "x", "y"
 
 (def r0 (mpz 14)) ; random from Z*q
 (def r1 (mpz 17)) ; random from Z*q

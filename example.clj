@@ -1,12 +1,23 @@
-(require '[clojure.core.reducers :as r])
 (defn mpz [x] (new org.cjcole.jnagmp.Mpz x))
 (def mpz0 (mpz 0))
-(def np 3)
+(def mpz+1 (fn [x] (.add x (mpz 1))))
+(defn mpz+ 
+  ([] (mpz 0))
+  ([a b] (.mod (.add a b) p)))
+(defn mpz*
+  ([] [(mpz 1) (mpz 1)])
+  ([a b] [(.mod (.mul (first a) (first b)) p) (.mod (.mul (second a) (second b)) p)]))
+
+(require '[clojure.core.reducers :as r])
+
+(def np 1)
 (def p (mpz 47))
 (def q (.cdivQ (.sub p 1) 2))
-(def g (mpz 3))
+(def g (mpz 3)) ; call "prtable" to find possible values
+
 (defn prgroup []
   (dotimes [i (.toInt q)] (println "i =" i ", g^i =" (.powm g (mpz i) p))))
+
 (defn prtable []
   (print "     ")
   (loop [a mpz0]
@@ -26,12 +37,6 @@
           (print (str (format "%2d" (.toInt (.powm g a p))) (if (= a (.sub p 1)) "\n" " ")))
           (if (not (= a (.sub p 1))) (recur (.add a 1)))))
       (if (not (= g (.sub p 1))) (recur (.add g 1))))))
-(defn mpz+ 
-  ([] (mpz 0))
-  ([a b] (.mod (.add a b) p)))
-(defn mpz*
-  ([] [(mpz 1) (mpz 1)])
-  ([a b] [(.mod (.mul (first a) (first b)) p) (.mod (.mul (second a) (second b)) p)]))
 (def xvec
   (loop [i 0 xvec []]
     (let [x (mpz (+ 13 i))] ; random from Z*q
@@ -48,7 +53,7 @@
   (loop [i 0 mvec []]
     (if (= i np)
       mvec
-      (recur (+ i 1) (conj mvec (mpz i))))))
+      (recur (+ i 1) (conj mvec (.add (mpz 1) (mpz i)))))))
 ;; TODO: remove x
 (def x (.mod (r/fold mpz+ xvec) p))
 (def y (.powm g x p)) ; a.k.a. "h"
@@ -64,11 +69,12 @@
 (defn encr1 [vec]
   (let [m (nth vec 0) r (nth vec 1)]
     (let [result [(.powm g r p) (.mod (.mul (group-elem m) (.powm y r p)) p)]]
-      (println "m =" m ", y =" y ", r =" r ", result =" result)
-      (println "  gm =" (group-elem m) ", (.powm y r p) =" (.powm y r p))
+;      (println "m =" m ", y =" y ", r =" r ", result =" result)
+;      (println "  gm =" (group-elem m) ", (.powm y r p) =" (.powm y r p))
       result)))
-(defn encr [mvec] (r/fold mpz* (r/map encr1 (map vector mvec rands))))
+(defn encr [mvec] (r/fold mpz* (map encr1 (map vector mvec rands))))
 (defn decr [e] (group-index (.mod (.mul (second e) (.powm (first e) (.neg x) p)) p)))
+
 ; (def rands [(mpz 2) (mpz 4) (mpz 6)])
 ; (def mvec [(mpz 1) (mpz 1) (mpz 1)])
 ; (decr (encr mvec))
@@ -103,28 +109,24 @@
       (logs-eq? [m ma s sa] a)
       (logs-eq? [g y ma max] x)))) ;; TODO: use of "x"
 
-(def r0 (mpz 14)) ; random from Z*q
-(def r1 (mpz 17)) ; random from Z*q
-(def r2 (mpz 18)) ; random from Z*q
+(def e (encr mvec))
+(def esame (encr mvec))
+(def ediff (encr mvec))
+(def ediff (encr (map mpz+1 mvec)))
 
-(def m1 (mpz 1))
-(def m2 (mpz 2))
-(def e (encr m1 r0))
-(def esame (encr m1 r1))
-(def ediff (encr m2 r2))
 (oblivious-eq? e esame)
 (oblivious-eq? e ediff)
 
 (dotimes [n1 (.toInt p)]
-  (let [n2 (decr (encr (mpz n1) r1))]
+  (let [n2 (decr (encr1 [(mpz n1) r1]))]
     (if (not (= (mpz n1) n2))
       (println (str (format "%2d %2d" n1 (.toInt n2)))))))
 
 (dotimes [n1 (.toInt q)] 
   (dotimes [n2 (.toInt q)]
     (let [
-          e1 (encr (mpz (.powm g (mpz n1) p)) r1)
-          e2 (encr (mpz (.powm g (mpz n2) p)) r2)
+          e1 (encr1 [(mpz (.powm g (mpz n1) p)) r1])
+          e2 (encr1 [(mpz (.powm g (mpz n2) p)) r2])
          ]
       (if (or
             (and (= n1 n2) (not (oblivious-eq? e1 e2)))

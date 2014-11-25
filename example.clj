@@ -1,9 +1,11 @@
+; (load-file "../jna-gmp/example.clj")
+
 (defn mpz [x] (new org.cjcole.jnagmp.Mpz x))
 
 (def np 2)
 (def p (mpz 47))
 (def q (.cdivQ (.sub p 1) 2))
-(def g (mpz 3)) ; call "prtable" to find possible values
+(def g (mpz 3)) ; free choice: call "prtable" to see possible values
 
 (def mpz0 (mpz 0))
 (def mpz+1 (fn [x] (.add x (mpz 1))))
@@ -70,39 +72,53 @@
 (defn group-index [gm] (group-index-map gm))
 
 (defn encr 
+  ; TODO: take optional vector of randomness
   ([mvec] 
     (defn encr-helper [vec]
-      (let [m (nth vec 0) r (nth vec 1)]
-        (encr m r)))
+      (let [mi (nth vec 0) r (nth vec 1)]
+        (encr mi r)))
      (r/fold encr* (map encr-helper (map vector mvec rands))))
-  ([m r] 
-    (let [result [(.powm g r p) (.mod (.mul (group-elem m) (.powm y r p)) p)]]
-;      (println "m =" m ", y =" y ", r =" r ", result =" result)
-;      (println "  gm =" (group-elem m) ", (.powm y r p) =" (.powm y r p))
+  ([mi r] 
+    (let [a (.powm g r p) 
+          b (.mod (.mul (group-elem mi) (.powm y r p)) p)
+          result [a b]]
       result)))
 (defn decr [e] (group-index (.mod (.mul (second e) (.powm (first e) (.neg x) p)) p)))
 
-; (def rands [(mpz 2) (mpz 4) (mpz 6)])
-; (def mvec [(mpz 1) (mpz 1) (mpz 1)])
-; (decr (encr mvec))
-
-(defn logs-eq? [params exp]
+(defn logs-eq? [params xvec]
   (let [g1 (nth params 0)
         h1 (nth params 1)
         g2 (nth params 2)
         h2 (nth params 3)
-        r (mpz 22) ; random from Z*q
         c (mpz 21)] ; random from Z*q
-    (let [a (.powm g1 r p)
-          b (.powm g2 r p)
-          y (.mod (.add (.mul c exp) r) q)]
-      (let [p1 (.powm g1 y p)
-            p2 (.mod (.mul (.powm h1 c p) a) p)
-            q1 (.powm g2 y p)
-            q2 (.mod (.mul (.powm h2 c p) b) p)]
-        (and (= p1 p2) (= q1 q2))))))
+    (defn joint-logs-eq? 
+      ([params xvec]
+        (defn accum
+          ([] [(mpz 1) (mpz 1) (mpz 0)])
+          ([a b] [(.mod (.mul (nth a 0) (nth b 0)) p) 
+                  (.mod (.mul (nth a 1) (nth b 1)) p)
+                  (.mod (.add (nth a 2) (nth b 2)) p)]))
+        (defn joint-logs-eq?-helper [vec]
+          (let [xi (nth vec 0) r (nth vec 1)]
+            (joint-logs-eq? params xi r)))
+         (let [result (r/fold accum (map joint-logs-eq?-helper (map vector xvec rands)))]
+           result))
+      ([params xi r]
+          (let [a (.powm g1 r p)
+                b (.powm g2 r p)
+                y (.mod (.add (.mul c xi) r) q)]
+             [a b y])))
+  (let [result (joint-logs-eq? params xvec)
+        a (nth result 0)
+        b (nth result 1)
+        y (nth result 2)
+        p1 (.powm g1 y p)
+        p2 (.mod (.mul (.powm h1 c p) a) p)
+        q1 (.powm g2 y p)
+        q2 (.mod (.mul (.powm h2 c p) b) p)]
+    (and (= p1 p2) (= q1 q2)))))
 
-(defn joint-oblivious-eq? [e1 e2]
+(defn oblivious-eq? [e1 e2]
   (let [a (mpz 8) ; random from Z*q
         m (.mod (.mul (first e1) (.invert (first e2) p)) p)
         s (.mod (.mul (second e1) (.invert (second e2) p)) p)
@@ -111,28 +127,13 @@
     (defn make-max [xi]
       (.powm m (.mul a xi) p)) ; m^(a*x)
     (let [max (r/fold mpz* (map make-max xvec))]
-      (println sa)
-      (println max)
-      (println ma)
-      (= sa max)))) ; check logs
-
-(defn oblivious-eq? [e1 e2]
-  (let [
-        a (mpz 8) ; random from Z*q
-        m (.mod (.mul (first e1) (.invert (first e2) p)) p)
-        s (.mod (.mul (second e1) (.invert (second e2) p)) p)
-        sa (.powm s a p)
-        max (.powm m (.mul a x) p) ;; TODO: use of "x"
-        ma (.powm m a p)
-       ]
-    (and
-      (= sa max)
-      (logs-eq? [m ma s sa] a)
-      (logs-eq? [g y ma max] x)))) ;; TODO: use of "x"
+      (and
+        (= sa max)
+        (logs-eq? [m ma s sa] [a]) ; log(m)(m^a) = log(s)(s^a)
+        (logs-eq? [g y ma max] xvec))))) ; log(g)(y) = log(m^a)(m^(a*x))
 
 (def e (encr mvec))
-(def esame (encr mvec))
-(def ediff (encr mvec))
+(def esame (encr mvec)) ; TODO: use different randomness (optional arg?)
 (def ediff (encr (map mpz+1 mvec)))
 
 (oblivious-eq? e esame)

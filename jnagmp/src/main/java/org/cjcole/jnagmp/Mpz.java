@@ -25,6 +25,7 @@ package org.cjcole.jnagmp;
 import com.squareup.jnagmp.LibGmp;
 import com.squareup.jnagmp.LibGmp.mpz_t;
 import com.sun.jna.Memory;
+import java.io.UnsupportedEncodingException;
 
 public class Mpz {
 
@@ -58,6 +59,14 @@ public class Mpz {
 
   public Mpz(long op) {
     LibGmp.__gmpz_set_si(getPeer(), op);
+  }
+
+  public Mpz(String str, int base) throws UnsupportedEncodingException {
+    byte[] bytes = str.getBytes("US-ASCII");
+    Memory memory = new Memory(bytes.length + 1);
+    memory.write(0, bytes, 0, bytes.length);
+    memory.setByte(bytes.length, (byte) 0);
+    LibGmp.__gmpz_set_str(getPeer(), memory, base);
   }
 
   public Mpz add(Mpz op) {

@@ -320,6 +320,25 @@ public final class LibGmp {
   public static native void __gmpz_set_si(mpz_t rop, long op);
 
   /**
+   * Set the value of rop from str, a null-terminated C string in base
+   * base. White space is allowed in the string, and is simply
+   * ignored.
+   *
+   * The base may vary from 2 to 62, or if base is 0, then the leading
+   * characters are used: 0x and 0X for hexadecimal, 0b and 0B for
+   * binary, 0 for octal, or decimal otherwise.
+   *
+   * For bases up to 36, case is ignored; upper-case and lower-case
+   * letters have the same value. For bases 37 to 62, upper-case
+   * letter represent the usual 10..35 while lower-case letter
+   * represent 36..61.
+   *
+   * This function returns 0 if the entire string is a valid number in
+   * base base. Otherwise it returns −1.
+   */
+  public static native void __gmpz_set_str(mpz_t rop, Pointer str, int base);
+
+  /**
    * Set the value of rop from op.
    */
   public static native void __gmpz_set(mpz_t rop, mpz_t op);
